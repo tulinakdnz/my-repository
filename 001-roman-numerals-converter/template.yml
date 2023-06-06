@@ -1,0 +1,72 @@
+AWSTemplateFormatVersion: 2010-09-09
+
+Description: |
+  Build a roman numerals application with EC2 instance and security group
+  
+Parameters:
+
+  KeyPair:
+    Description: Keypair for ec2 instance
+    Type: AWS::EC2::KeyPair::KeyName
+
+  AmiID:
+    Description: Default Amazon Linux AMI ID
+    Type: AWS::SSM::Parameter::Value<AWS::EC2::Image::Id>
+    Default: /aws/service/ami-amazon-linux-latest/al2023-ami-kernel-6.1-x86_64
+
+  ServerName:
+    Description: Name of Web Server
+    Type: String
+  
+Resources:
+
+  MySecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: "Allow HTTP and SSH" # Required
+      SecurityGroupIngress: 
+        - CidrIp: 0.0.0.0/0
+          FromPort: 80
+          ToPort: 80
+          IpProtocol: tcp # Required
+        - CidrIp: 0.0.0.0/0
+          FromPort: 22
+          ToPort: 22
+          IpProtocol: tcp # Required
+
+  WebServer:
+    Type: AWS::EC2::Instance
+    Properties:
+      ImageId: !Ref AmiID
+      InstanceType: t2.micro
+      KeyName: !Ref KeyPair
+      SecurityGroupIds: 
+        - !Ref MySecurityGroup
+      Tags: 
+        - Key: Name
+          Value: !Ref ServerName
+      UserData: !Base64 |
+        #!/bin/bash -x
+
+        yum update -y
+        yum install python3 -y
+        yum install python3-pip -y
+        pip3 install flask
+
+        cd /home/ec2-user
+
+        wget https://raw.githubusercontent.com/tulinakdnz/my-repository/main/001-roman-numerals-converter/app.py
+        mkdir templates
+        cd templates
+        wget https://raw.githubusercontent.com/tulinakdnz/my-repository/main/001-roman-numerals-converter/templates/index.html
+        wget https://raw.githubusercontent.com/tulinakdnz/my-repository/main/001-roman-numerals-converter/templates/result.html
+
+        cd ..
+        python3 app.py
+
+Outputs:
+  WebsiteURL:
+    Description: Roman Numerals Converter Application URL
+    Value: !Sub 
+      - http://${PublicAddress}
+      - PublicAddress: !GetAtt WebServer.PublicDnsName
