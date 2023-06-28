@@ -1,0 +1,42 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: |
+  Resources to build phonebook app, include EC2, RDS and ALB
+  
+#Parameters:
+  
+Resources:
+
+  DBSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Allow MySQL Traffic
+      SecurityGroupIngress:
+      - IpProtocol: tcp
+        FromPort: 3306
+        ToPort: 3306
+        CidrIp: 0.0.0.0/0
+      Tags:
+        - Key: Name
+          Value: MySQLSecGroup
+
+  PhonebookDatabaseInstance:
+    Type: AWS::RDS::DBInstance
+    Properties:
+      DBInstanceIdentifier: tulin-phonebook-rds
+      DBName: clarusway_phonebook
+      Engine: MySQL
+      EngineVersion: "8.0.33"
+      Port: "3306"
+      VPCSecurityGroups: 
+        - !GetAtt DBSecurityGroup.GroupId
+      MasterUsername: admin
+      MasterUserPassword: Serdar_1
+      DBInstanceClass: db.t2.micro
+      AllocatedStorage: "20"
+      AutoMinorVersionUpgrade: false
+      BackupRetentionPeriod: 7
+      DeletionProtection: false
+      MultiAZ: false
+      PubliclyAccessible: true
+  
+#Outputs:

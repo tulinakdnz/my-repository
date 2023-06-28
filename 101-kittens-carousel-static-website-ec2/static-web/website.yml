@@ -1,0 +1,45 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: |
+  A kittens carousel website, including ec2 instance and security group
+  
+Resources:
+
+  MySecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: "Allow SSH and HTTP" # Required
+      SecurityGroupIngress: 
+        - IpProtocol: tcp
+          FromPort: 80
+          ToPort: 80
+          CidrIp: 0.0.0.0/0
+        - IpProtocol: tcp
+          FromPort: 22
+          ToPort: 22
+          CidrIp: 0.0.0.0/0
+
+  MyWebServer:
+    Type: AWS::EC2::Instance
+    Properties:
+      ImageId: ami-0889a44b331db0194
+      InstanceType: t2.micro
+      KeyName: altaz-clarusway
+      SecurityGroupIds: 
+        - !Ref MySecurityGroup
+      Tags: 
+        - Key: Name
+          Value: Altaz Kittens Web Server
+      UserData: 
+        Fn::Base64: 
+          |
+            #! /bin/bash -x
+            yum update -y
+            yum install httpd -y
+            cd /var/www/html
+            FOLDER="https://raw.githubusercontent.com/tulinakdnz/my-repository/main/101-kittens-carousel-static-website-ec2/static-web/index.html/"
+            wget ${FOLDER}index.html
+            wget ${FOLDER}cat0.jpg
+            wget ${FOLDER}cat1.jpg
+            wget ${FOLDER}cat2.jpg
+            systemctl start httpd
+            systemctl enable httpd

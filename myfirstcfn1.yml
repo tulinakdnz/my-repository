@@ -1,0 +1,36 @@
+AWSTemplateFormatVersion: 2010-09-09
+
+Description: |
+  This template creates an EC2 instance and a security group
+  
+Resources:
+
+  MySecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Enable SSH # Required
+      GroupName: ClaruswaySecurityGroup
+      SecurityGroupIngress: 
+        - IpProtocol: tcp # Required
+          FromPort: 22
+          ToPort: 22
+          CidrIp: 0.0.0.0/0
+
+  Webserver:
+    Type: AWS::EC2::Instance
+    Properties:
+      ImageId: ami-0889a44b331db0194
+      InstanceType: t2.micro
+      KeyName: tulin-keypair # please use your own key without pem.
+      SecurityGroups:
+        - !Ref MySecurityGroup
+      Tags:
+        - Key: Name
+          Value: CFN-Instance
+        - Key: Environment
+          Value: Dev  
+           
+           
+      
+  
+
