@@ -7,7 +7,7 @@ Parameters:
   pKittensDomainName:
     Description: Full subdomain for kittens website
     Type: String
-    Default: mykittens.clarusway.us
+    Default: mykittens.awsdevopscloud.com
 
   pHostedZoneId:
     Description: Hosted Zone ID
