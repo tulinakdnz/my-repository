@@ -1,0 +1,49 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mongo-express-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      name: mongo-express
+  template:
+    metadata:
+      labels:
+        name: mongo-express
+        app: todoapp
+    spec:
+      containers: 
+        - image: mongo-express
+          imagePullPolicy: Always
+          name: mymongo-express
+          ports: 
+            - containerPort: 8081
+          env:
+            - name: "ME_CONFIG_MONGODB_SERVER"
+              value: db-service
+          resources:
+            limits:
+              memory: 500Mi
+              cpu: 100m
+            requests:
+              memory: 250Mi
+              cpu: 80m
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mongo-express-service
+  labels:
+    name: mongo-express
+    app: todoapp
+spec:
+  selector:
+    name: mongo-express 
+  type: NodePort
+  ports:
+   - name: http
+     port: 8081
+     targetPort: 8081
+     nodePort: 30003
+     protocol: TCP
